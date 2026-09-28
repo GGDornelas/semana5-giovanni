@@ -1,0 +1,18 @@
+# .dockerignore exclusivo do Dockerfile.prod: além do padrão, remove
+# testes e ferramentas de desenvolvimento da imagem de produção.
+.git
+.gitignore
+.env
+.env.*
+venv/
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+staticfiles/
+Dockerfile*
+.dockerignore
+**/tests.py
+**/tests/
+requirements-dev.txt
+ruff.toml

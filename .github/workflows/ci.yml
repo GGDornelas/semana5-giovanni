@@ -70,6 +70,17 @@ jobs:
       - name: Validação do container
         run: docker run --rm backend-ci python manage.py check
 
+      - name: Build da imagem de produção
+        run: docker build -t backend-prod-ci -f Dockerfile.prod .
+
+      - name: Validação da imagem de produção (usuário não-root, sem pip)
+        run: |
+          test "$(docker run --rm backend-prod-ci whoami)" = "django"
+          if docker run --rm backend-prod-ci sh -c 'command -v pip'; then
+            echo "pip não deveria existir na imagem de produção"; exit 1
+          fi
+          docker image ls backend-prod-ci
+
   test-backend:
     name: test-backend (manage.py test)
     runs-on: ubuntu-latest
@@ -158,6 +169,16 @@ jobs:
 
       - name: Build da imagem
         run: docker build -t frontend-ci -f Dockerfile .
+
+      - name: Build da imagem de produção
+        run: docker build -t frontend-prod-ci -f Dockerfile.prod .
+
+      - name: Validação da imagem de produção (< 150 MB, usuário nextjs)
+        run: |
+          SIZE=$(docker image inspect -f '{{.Size}}' frontend-prod-ci)
+          echo "Tamanho da imagem: $((SIZE / 1024 / 1024)) MB"
+          test "$SIZE" -lt $((150 * 1024 * 1024))
+          test "$(docker run --rm frontend-prod-ci whoami)" = "nextjs"
 
   test-frontend:
     name: test-frontend (vitest)

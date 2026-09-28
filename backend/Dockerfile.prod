@@ -1,0 +1,40 @@
+# Imagem de PRODUÇÃO do backend (Gunicorn, usuário sem privilégios)
+
+# --- builder: instala dependências num virtualenv isolado ---
+FROM python:3.12-alpine AS builder
+
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt \
+ && pip uninstall -y pip
+
+# --- runtime: apenas o virtualenv pronto + código da aplicação ---
+FROM python:3.12-alpine AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    DJANGO_DEBUG=False
+
+RUN addgroup -S django \
+ && adduser -S -G django -h /home/django -s /sbin/nologin django \
+ && pip uninstall -y pip
+
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+COPY . .
+
+# Código e estáticos pertencem ao root: o usuário da aplicação só lê.
+RUN DJANGO_SECRET_KEY=collectstatic-only python manage.py collectstatic --noinput
+
+USER django
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile -"]

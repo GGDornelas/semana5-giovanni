@@ -2,6 +2,11 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
+
+  // A aplicação não usa next/image; dispensa o sharp na imagem de produção.
+  images: { unoptimized: true },
+
   // O Django usa barra final nas rotas; o Next não deve redirecioná-las.
   skipTrailingSlashRedirect: true,
 

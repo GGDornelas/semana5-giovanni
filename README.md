@@ -23,6 +23,17 @@ docker compose up --build
 - Backend:  http://localhost:8000/api/health/ (auto-reload do runserver)
 - O backend só inicia após o healthcheck do PostgreSQL (`pg_isready`).
 
+## Imagens de produção
+
+```bash
+docker build -f backend/Dockerfile.prod  -t semana5-backend-prod  ./backend
+docker build -f frontend/Dockerfile.prod -t semana5-frontend-prod ./frontend
+```
+
+- Backend: `python:3.12-alpine`, Gunicorn, usuário `django` (sem root, sem pip, sem testes).
+- Frontend: multi-stage `deps` → `builder` → `runner`, `output: 'standalone'`,
+  usuário `nextjs`, imagem final < 150 MB.
+
 ## Rodando sem Docker (referência)
 
 ```bash
