@@ -12,6 +12,17 @@ frontend/   Next.js (App Router, página em app/page.js)
 nginx/      Proxy reverso + SSL (produção)
 ```
 
+## Desenvolvimento com Docker Compose
+
+```bash
+cp .env.example .env          # ajuste as credenciais locais
+docker compose up --build
+```
+
+- Frontend: http://localhost:3000 (hot reload)
+- Backend:  http://localhost:8000/api/health/ (auto-reload do runserver)
+- O backend só inicia após o healthcheck do PostgreSQL (`pg_isready`).
+
 ## Rodando sem Docker (referência)
 
 ```bash
