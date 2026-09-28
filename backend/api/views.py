@@ -1,3 +1,5 @@
+import os  # falha controlada (lint): import não usado
+
 from django.db import connection
 from django.http import JsonResponse
 

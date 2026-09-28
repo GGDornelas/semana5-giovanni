@@ -21,3 +21,9 @@ export async function fetchHealth(fetcher = fetch) {
 
   return parseHealth(await response.json());
 }
+
+// Falha controlada (lint): ESLint acusa @next/next/no-assign-module-variable
+export function falhaDeLint() {
+  let module = "quebra o lint";
+  return module;
+}
