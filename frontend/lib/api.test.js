@@ -11,7 +11,8 @@ describe("parseHealth", () => {
     });
 
     expect(data.status).toBe("ok");
-    expect(data.items).toHaveLength(3);
+    // Falha controlada (teste): quantidade esperada incorreta
+    expect(data.items).toHaveLength(4);
   });
 
   it("usa lista vazia quando items não é array", () => {

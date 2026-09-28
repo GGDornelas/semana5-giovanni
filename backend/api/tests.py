@@ -12,7 +12,8 @@ class HealthEndpointTests(TestCase):
     def test_health_payload_structure(self):
         data = self.client.get("/api/health/").json()
 
-        self.assertEqual(data["status"], "ok")
+        # Falha controlada (teste): status esperado incorreto
+        self.assertEqual(data["status"], "erro")
         self.assertEqual(data["database"], "ok")
         self.assertEqual(
             data["items"],

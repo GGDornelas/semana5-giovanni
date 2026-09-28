@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api",
-    "app_inexistente",  # falha controlada (build): app que não existe
 ]
 
 MIDDLEWARE = [

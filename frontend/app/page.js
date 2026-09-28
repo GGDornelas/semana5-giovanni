@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { fetchHealth } from "@/lib/api";
-// Falha controlada (build): módulo inexistente
-import Inexistente from "@/lib/modulo-inexistente";
 
 import styles from "./page.module.css";
 
@@ -21,7 +19,6 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <h1>Semana 5 · Do Dev ao Deploy</h1>
-      <Inexistente />
       <p className={styles.subtitle}>Django + Next.js + PostgreSQL + Nginx</p>
 
       {error && <p className={styles.error}>Erro ao consultar a API: {error}</p>}
