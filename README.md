@@ -45,6 +45,23 @@ docker compose -f docker-compose-prod.yml up -d --build
 - `/api/`, `/admin/` e `/static/` → `backend:8000`; `/` → `frontend:3000`.
 - backend, frontend e db usam somente `expose`; o banco fica numa rede `internal`.
 
+## CI/CD e imagens publicadas (GHCR)
+
+Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+```
+lint-backend  -> build-backend  -> test-backend  -> deploy-backend
+lint-frontend -> build-frontend -> test-frontend -> deploy-frontend
+```
+
+A cada push no `main` com as trilhas verdes, as imagens de produção são publicadas:
+
+```bash
+docker pull ghcr.io/ggdornelas/semana5-giovanni-backend:latest
+docker pull ghcr.io/ggdornelas/semana5-giovanni-frontend:latest
+# ou fixando a versão pelo commit: ...:<sha-do-commit>
+```
+
 ## Rodando sem Docker (referência)
 
 ```bash
