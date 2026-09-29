@@ -34,6 +34,17 @@ docker build -f frontend/Dockerfile.prod -t semana5-frontend-prod ./frontend
 - Frontend: multi-stage `deps` → `builder` → `runner`, `output: 'standalone'`,
   usuário `nextjs`, imagem final < 150 MB.
 
+## Stack de produção (Nginx + SSL)
+
+```bash
+sh nginx/generate-certs.sh                            # certificado autoassinado
+docker compose -f docker-compose-prod.yml up -d --build
+```
+
+- Apenas o Nginx publica portas (80 e 443); HTTP redireciona (301) para HTTPS.
+- `/api/`, `/admin/` e `/static/` → `backend:8000`; `/` → `frontend:3000`.
+- backend, frontend e db usam somente `expose`; o banco fica numa rede `internal`.
+
 ## Rodando sem Docker (referência)
 
 ```bash
