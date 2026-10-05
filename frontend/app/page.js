@@ -2,19 +2,28 @@
 
 import { useEffect, useState } from "react";
 
-import { fetchHealth } from "@/lib/api";
+import { DATA_SOURCE, loadData, tryWrite } from "@/lib/data-source";
 
 import styles from "./page.module.css";
 
 export default function Home() {
   const [health, setHealth] = useState(null);
   const [error, setError] = useState(null);
+  const [writeResult, setWriteResult] = useState(null);
 
   useEffect(() => {
-    fetchHealth()
+    loadData()
       .then(setHealth)
       .catch((err) => setError(err.message));
   }, []);
+
+  async function handleTryWrite() {
+    setWriteResult("Tentando gravar...");
+    const result = await tryWrite();
+    setWriteResult(
+      result.allowed ? "Escrita permitida (as regras deveriam negar!)" : `Bloqueado: ${result.code}`,
+    );
+  }
 
   return (
     <main className={styles.main}>
@@ -46,6 +55,17 @@ export default function Home() {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </section>
+      )}
+
+      <p className={styles.detail}>Fonte de dados: {DATA_SOURCE}</p>
+
+      {DATA_SOURCE === "firestore" && (
+        <section className={styles.writeTest}>
+          <button type="button" onClick={handleTryWrite}>
+            Testar escrita no Firestore
+          </button>
+          {writeResult && <p id="write-result">{writeResult}</p>}
         </section>
       )}
     </main>

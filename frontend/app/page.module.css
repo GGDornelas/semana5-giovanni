@@ -32,4 +32,22 @@
 .detail {
   color: #888;
   font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+.writeTest {
+  margin-top: 1.5rem;
+}
+
+.writeTest button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #888;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.writeTest p {
+  margin-top: 0.75rem;
 }
