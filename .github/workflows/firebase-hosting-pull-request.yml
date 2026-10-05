@@ -1,0 +1,104 @@
+# Gerado por `firebase init hosting:github` e adaptado para a Semana 6:
+# qualidade (lint + testes) -> build estático -> deploy em canal de preview -> smoke test.
+
+name: Deploy to Firebase Hosting on PR
+on: pull_request
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: firebase-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_DATA_SOURCE: firestore
+  NEXT_PUBLIC_USE_EMULATOR: "false"
+  NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.NEXT_PUBLIC_FIREBASE_API_KEY }}
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+  NEXT_PUBLIC_FIREBASE_APP_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_APP_ID }}
+
+jobs:
+  quality:
+    name: quality (eslint + vitest)
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vitest
+        run: npm test
+
+  build:
+    name: build (next export)
+    needs: quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Build estático
+        run: npm run build:static
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: frontend/out
+          retention-days: 1
+
+  preview:
+    name: deploy (canal de preview)
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.details_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: frontend/out
+
+      - id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SEMANA6_GIOVANNI }}
+          projectId: semana6-giovanni
+          expires: 7d
+
+  smoke:
+    name: smoke test (curl --fail)
+    needs: preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preview responde 200
+        run: curl --fail --silent --show-error --location --retry 5 --retry-delay 5 "${{ needs.preview.outputs.url }}" -o /dev/null

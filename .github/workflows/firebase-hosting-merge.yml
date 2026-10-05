@@ -1,0 +1,107 @@
+# Gerado por `firebase init hosting:github` e adaptado para a Semana 6:
+# qualidade (lint + testes) -> build estático -> deploy no canal live -> smoke test.
+
+name: Deploy to Firebase Hosting on merge
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: read
+
+concurrency:
+  group: firebase-live
+  # Não cancela um deploy de produção em andamento; o próximo espera na fila.
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://semana6-giovanni.web.app
+  NEXT_PUBLIC_DATA_SOURCE: firestore
+  NEXT_PUBLIC_USE_EMULATOR: "false"
+  NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.NEXT_PUBLIC_FIREBASE_API_KEY }}
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+  NEXT_PUBLIC_FIREBASE_APP_ID: ${{ vars.NEXT_PUBLIC_FIREBASE_APP_ID }}
+
+jobs:
+  quality:
+    name: quality (eslint + vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vitest
+        run: npm test
+
+  build:
+    name: build (next export)
+    needs: quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Build estático
+        run: npm run build:static
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: frontend/out
+          retention-days: 1
+
+  deploy:
+    name: deploy (canal live)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: frontend/out
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SEMANA6_GIOVANNI }}
+          channelId: live
+          projectId: semana6-giovanni
+
+  smoke:
+    name: smoke test (curl --fail)
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Produção responde 200
+        run: curl --fail --silent --show-error --location --retry 5 --retry-delay 5 "$SITE_URL" -o /dev/null
+
+      - name: Página publicada é a do projeto
+        run: curl --fail --silent --location "$SITE_URL" | grep -q "Do Dev ao Deploy"
