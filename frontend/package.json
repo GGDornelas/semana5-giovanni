@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "build:static": "STATIC_EXPORT=true next build",
-    "build:emulator": "STATIC_EXPORT=true NEXT_PUBLIC_DATA_SOURCE=firestore NEXT_PUBLIC_USE_EMULATOR=true next build"
+    "build:emulator": "STATIC_EXPORT=true NEXT_PUBLIC_DATA_SOURCE=firestore NEXT_PUBLIC_USE_EMULATOR=true next build",
+    "build:versao-b": "STATIC_EXPORT=true NEXT_PUBLIC_VARIANT=b next build"
   },
   "dependencies": {
     "firebase": "^12.19.0",

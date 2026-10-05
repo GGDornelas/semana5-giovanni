@@ -21,6 +21,14 @@
   padding-left: 1.25rem;
 }
 
+.versionB h1 {
+  color: #ff9100;
+}
+
+.versionB .card {
+  border-color: #ff9100;
+}
+
 .unavailable {
   border-color: #d4a017;
 }

@@ -6,6 +6,9 @@ import { DATA_SOURCE, loadData, tryWrite } from "@/lib/data-source";
 
 import styles from "./page.module.css";
 
+// Versão B (canal de pré-visualização do Hosting): título, cor e ordem dos itens diferentes.
+const isVersionB = process.env.NEXT_PUBLIC_VARIANT === "b";
+
 export default function Home() {
   const [health, setHealth] = useState(null);
   const [error, setError] = useState(null);
@@ -26,9 +29,13 @@ export default function Home() {
   }
 
   return (
-    <main className={styles.main}>
-      <h1>Semana 5 · Do Dev ao Deploy</h1>
-      <p className={styles.subtitle}>Django + Next.js + PostgreSQL + Nginx</p>
+    <main className={`${styles.main} ${isVersionB ? styles.versionB : ""}`}>
+      <h1>{isVersionB ? "Versão B · Do Container à Nuvem" : "Semana 5 · Do Dev ao Deploy"}</h1>
+      <p className={styles.subtitle}>
+        {isVersionB
+          ? "Next.js no Firebase Hosting + Cloud Firestore"
+          : "Django + Next.js + PostgreSQL + Nginx"}
+      </p>
 
       {error && (
         <section className={`${styles.card} ${styles.unavailable}`} role="status">
@@ -51,7 +58,7 @@ export default function Home() {
             Banco de dados: <strong>{health.database}</strong>
           </p>
           <ul>
-            {health.items.map((item) => (
+            {(isVersionB ? [...health.items].reverse() : health.items).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
