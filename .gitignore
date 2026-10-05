@@ -21,6 +21,17 @@ coverage/
 nginx/certs/*.key
 nginx/certs/*.crt
 
+# Firebase: logs, cache local e credenciais (nunca versionar chaves)
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+*service-account*.json
+*-firebase-adminsdk-*.json
+credentials*.json
+frontend/out/
+
 # SO / editores
 .DS_Store
 .vscode/

@@ -1,0 +1,10 @@
+rules_version = '2';
+
+// Padrão seguro: nada é lido nem gravado até existir uma regra explícita.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
