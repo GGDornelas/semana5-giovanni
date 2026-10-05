@@ -21,9 +21,17 @@ export default function Home() {
       <h1>Semana 5 · Do Dev ao Deploy</h1>
       <p className={styles.subtitle}>Django + Next.js + PostgreSQL + Nginx</p>
 
-      {error && <p className={styles.error}>Erro ao consultar a API: {error}</p>}
+      {error && (
+        <section className={`${styles.card} ${styles.unavailable}`} role="status">
+          <p>
+            <strong>Dados indisponíveis no momento.</strong>
+          </p>
+          <p>A página está no ar, mas a fonte de dados não respondeu. Tente novamente mais tarde.</p>
+          <p className={styles.detail}>Detalhe técnico: {error}</p>
+        </section>
+      )}
 
-      {!health && !error && <p>Carregando dados do backend...</p>}
+      {!health && !error && <p>Carregando dados...</p>}
 
       {health && (
         <section className={styles.card}>

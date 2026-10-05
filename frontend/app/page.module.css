@@ -21,6 +21,15 @@
   padding-left: 1.25rem;
 }
 
-.error {
-  color: #b00020;
+.unavailable {
+  border-color: #d4a017;
+}
+
+.unavailable p + p {
+  margin-top: 0.5rem;
+}
+
+.detail {
+  color: #888;
+  font-size: 0.85rem;
 }
